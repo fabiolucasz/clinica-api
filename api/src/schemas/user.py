@@ -111,15 +111,15 @@ class MedicoBase(BaseModel):
     estado: int = 1
     role: str = 'medico'
     
-    # Perfil (opcional)
+    # Perfil profissional (opcional)
     foto_perfil: str | None = None
-    especialidade: int = 1
+    especialidade: int | None = None
     rqe: str | None = None
-    valor_consulta: float = 150
+    valor_consulta: float | None = None
     
     # Documentos (opcional)
-    tipo_conselho: int = 1
-    uf_conselho: int = 1
+    tipo_conselho: int | None = None
+    uf_conselho: int | None = None
     numero_conselho: str | None = None
     upload_arquivo: str | None = None
 
