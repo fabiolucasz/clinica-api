@@ -9,6 +9,8 @@ from src.routes.salas import router as salas_router
 from src.routes.vagas import router as vagas_router
 from src.routes.agendamentos import router as agendamentos_router
 from src.routes.calendario_clinica import router as calendario_clinica_router
+from src.routes.medico_sala_optimized import router as medico_sala_optimized_router
+from src.routes.medico_sala_simple import router as medico_sala_simple_router
 from src.metrics.auth_user import metrics_endpoint
 from src.database.connection import engine, Base
 from src.populate_db import populate_database
@@ -60,6 +62,8 @@ app.include_router(salas_router, tags=["Salas"])
 app.include_router(vagas_router, tags=["Vagas"])
 app.include_router(agendamentos_router, tags=["Agendamentos"])
 app.include_router(calendario_clinica_router, tags=["Calendario Clinica"])
+app.include_router(medico_sala_optimized_router, tags=["Medico Sala Optimized"])
+app.include_router(medico_sala_simple_router, tags=["Medico Sala Simple"])
 
 
 
