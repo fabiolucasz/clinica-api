@@ -35,6 +35,9 @@ class Turnos(Base):
     nome = Column(String(100), unique=True)
     hora_inicio = Column(String(5), nullable=False)
     hora_fim = Column(String(5), nullable=False)
+    
+    # Relacionamento com horários de consultas
+    horarios_consultas = relationship("HorariosConsultas", back_populates="turno_rel")
 
 class Estados(Base):
     __tablename__ = "estados"
@@ -230,3 +233,16 @@ class Agendamentos(Base):
     turno_rel = relationship("Turnos")
     paciente_rel = relationship("User", foreign_keys=[paciente])
     medico_rel = relationship("User", foreign_keys=[medico])
+
+
+# Model HorariosConsultas
+class HorariosConsultas(Base):
+    __tablename__ = "horarios_consultas"
+    
+    id = Column(Integer, primary_key=True, index=True, nullable=False, autoincrement=True)
+    hora_inicio = Column(String(5), nullable=False)  # Formato HH:MM
+    hora_fim = Column(String(5), nullable=False)    # Formato HH:MM
+    turno = Column(Integer, ForeignKey("turnos.id"), nullable=False)
+    
+    # Relacionamento
+    turno_rel = relationship("Turnos", back_populates="horarios_consultas")

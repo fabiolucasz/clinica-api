@@ -222,6 +222,65 @@ def popular_calendario_clinica():
     finally:
         db.close()
 
+def create_horario_consulta():
+    """Cria horários de consultas conforme especificado"""
+    print("⏰ Criando horários de consultas...")
+    try:
+        db = SessionLocal()
+        try:
+            # Verificar se já existem horários
+            existing_count = db.query(models.HorariosConsultas).count()
+            if existing_count > 0:
+                print(f"  ℹ️  Já existem {existing_count} horários cadastrados. Pulando criação.")
+                return True
+            
+            # Dados conforme especificado
+            horarios_data = [
+                # Turno 1 - Manhã (08:00-12:00)
+                (1, "08:00", "09:00", 1),
+                (2, "09:00", "10:00", 1),
+                (3, "10:00", "11:00", 1),
+                (4, "11:00", "12:00", 1),
+                
+                # Turno 2 - Tarde (13:00-17:00)
+                (5, "13:00", "14:00", 2),
+                (6, "14:00", "15:00", 2),
+                (7, "15:00", "16:00", 2),
+                (8, "16:00", "17:00", 2),
+                
+                # Turno 3 - Noite (18:00-22:00)
+                (9, "18:00", "19:00", 3),
+                (10, "19:00", "20:00", 3),
+                (11, "20:00", "21:00", 3),
+                (12, "21:00", "22:00", 3),
+            ]
+            
+            for id, hora_inicio, hora_fim, turno_id in horarios_data:
+                # Verificar se já existe
+                existing = db.query(models.HorariosConsultas).filter(
+                    models.HorariosConsultas.id == id
+                ).first()
+                
+                if not existing:
+                    horario = models.HorariosConsultas(
+                        id=id,
+                        hora_inicio=hora_inicio,
+                        hora_fim=hora_fim,
+                        turno=turno_id
+                    )
+                    db.add(horario)
+                    print(f"  ✅ Horário criado: {hora_inicio}-{hora_fim} (Turno {turno_id})")
+            
+            db.commit()
+            print(f"  ✅ {len(horarios_data)} horários de consultas criados com sucesso!")
+            return True
+            
+        finally:
+            db.close()
+    except Exception as e:
+        print(f"Erro ao criar horários de consultas: {e}")
+        return False
+
 def populate_database():
     """Função principal para popular o banco de dados"""
     print("🚀 Iniciando população do banco de dados...")
@@ -231,6 +290,7 @@ def populate_database():
     create_tipos_conselho()
     create_especialidades()
     turnos()
+    create_horario_consulta()  # Adicionado!
     popular_calendario()
     popular_calendario_clinica()
     
