@@ -109,6 +109,8 @@ class User(Base):
     agendamentos_medico = relationship("Agendamentos", foreign_keys="Agendamentos.medico")
     estado_rel = relationship("Estados", foreign_keys=[estado])
     uf_conselho_rel = relationship("Estados", foreign_keys=[uf_conselho])
+    especialidade_rel = relationship("Especialidades", foreign_keys=[especialidade])
+    tipo_conselho_rel = relationship("Tipo_conselho", foreign_keys=[tipo_conselho])
     
 # Model Clinicas (depende de Estados)
 class Clinicas(Base):

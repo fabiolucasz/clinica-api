@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from src.crud import user as crud
 from src.models import models
-from src.schemas.user import PacienteBase, MedicoBase, PacienteCreate, PacienteUpdate, PacienteResponse, MedicoCreate, MedicoUpdate, MedicoResponse, UserCreate, UserUpdate, Token, User
+from src.schemas.user import PacienteBase, MedicoBase, PacienteCreate, PacienteUpdate, PacienteResponse, MedicoCreate, MedicoUpdate, MedicoResponse, MedicoResponseCompleto, UserCreate, UserUpdate, Token, User
 from src.auth import security
 from src.database.config import settings
 from src.database.connection import engine
@@ -194,6 +194,39 @@ async def get_medicos(request: Request, current_user: CurrentUser, db: SessionDe
     except Exception as e:
         log_user_operation(
             operation="get_medicos",
+            user_id=current_user.id,
+            success=False,
+            details={"error": str(e)}
+        )
+        MetricsManager.record_user_operation("read", "error")
+        raise HTTPException(
+            status_code=500,
+            detail="Internal server error"
+        )
+
+
+@router.get("/medicos/completo", response_model=list[MedicoResponseCompleto])
+async def get_medicos_completo(request: Request, current_user: CurrentUser, db: SessionDep):
+    start_time = time.time()
+    
+    try:
+        medicos = crud.get_medicos_completo(db)
+        
+        # Registra métricas de validação de token
+        validation_time = time.time() - start_time
+        MetricsManager.record_token_validation_time(validation_time)
+        
+        log_user_operation(
+            operation="get_medicos_completo",
+            user_id=current_user.id,
+            success=True
+        )
+        MetricsManager.record_user_operation("read", "success")
+        
+        return medicos
+    except Exception as e:
+        log_user_operation(
+            operation="get_medicos_completo",
             user_id=current_user.id,
             success=False,
             details={"error": str(e)}

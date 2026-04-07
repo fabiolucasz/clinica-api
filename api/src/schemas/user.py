@@ -157,6 +157,39 @@ class MedicoResponse(MedicoBase):
     
     model_config = {"from_attributes": True}
 
+
+class MedicoResponseCompleto(BaseModel):
+    id: int
+    nome: str
+    email: EmailStr
+    celular: str
+    cpf: str
+    data_nascimento: str
+    sexo: str
+    cep: str
+    rua: str
+    numero: str
+    bairro: str
+    cidade: str
+    estado: int
+    estado_nome: str | None = None
+    role: str
+    foto_perfil: str | None = None
+    especialidade: int | None = None
+    especialidade_nome: str | None = None
+    rqe: str | None = None
+    valor_consulta: float | None = None
+    tipo_conselho: int | None = None
+    tipo_conselho_nome: str | None = None
+    uf_conselho: int | None = None
+    uf_conselho_nome: str | None = None
+    numero_conselho: str | None = None
+    upload_arquivo: str | None = None
+    created_at: datetime
+    updated_at: datetime
+    
+    model_config = {"from_attributes": True}
+
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
