@@ -10,10 +10,15 @@ from typing import Optional
 router = APIRouter()
 
 class AgendamentoRequest(BaseModel):
-    paciente_id: int
-    medico_id: int
-    data_consulta: str  # YYYY-MM-DD
-    turno_id: int
+    clinica: int  # Clínica padrão = 1
+    sala: int
+    paciente: int  # Correspondente ao campo paciente no model
+    medico: int   # Correspondente ao campo medico no model
+    data_consulta: datetime  # DateTime completo
+    turno: int    # Correspondente ao campo turno no model
+    hora_inicio: str  # Formato HH:MM
+    hora_fim: str    # Formato HH:MM
+    status: str = "agendado"
 
 class AgendamentoResponse(BaseModel):
     success: bool
@@ -35,24 +40,9 @@ async def agendar_consulta(
     Endpoint otimizado para criar agendamentos
     """
     try:
-        # Converter data
-        data_consulta = datetime.strptime(agendamento_data.data_consulta, '%Y-%m-%d').date()
-        
-        # Determinar dia da semana (0=Segunda, 6=Domingo)
-        dia_semana = data_consulta.weekday()
-        nomes_dias = ['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado', 'domingo']
-        
-        if dia_semana >= 5:  # Sábado ou Domingo
-            return AgendamentoResponse(
-                success=False,
-                message="Agendamentos apenas disponíveis de segunda a sexta-feira."
-            )
-        
-        nome_dia = nomes_dias[dia_semana]
-        
         # Buscar paciente
         paciente = db.query(models.User).filter(
-            models.User.id == agendamento_data.paciente_id,
+            models.User.id == agendamento_data.paciente,
             models.User.role == 'paciente'
         ).first()
         
@@ -64,7 +54,7 @@ async def agendar_consulta(
         
         # Buscar médico
         medico = db.query(models.User).filter(
-            models.User.id == agendamento_data.medico_id,
+            models.User.id == agendamento_data.medico,
             models.User.role == 'medico'
         ).first()
         
@@ -74,106 +64,69 @@ async def agendar_consulta(
                 message="Médico não encontrado."
             )
         
-        # Buscar vaga do médico no dia e turno
-        vaga = None
-        if nome_dia == 'segunda':
-            vaga = db.query(models.Vagas).filter(
-                models.Vagas.segunda == agendamento_data.medico_id,
-                models.Vagas.turno == agendamento_data.turno_id
-            ).first()
-        elif nome_dia == 'terca':
-            vaga = db.query(models.Vagas).filter(
-                models.Vagas.terca == agendamento_data.medico_id,
-                models.Vagas.turno == agendamento_data.turno_id
-            ).first()
-        elif nome_dia == 'quarta':
-            vaga = db.query(models.Vagas).filter(
-                models.Vagas.quarta == agendamento_data.medico_id,
-                models.Vagas.turno == agendamento_data.turno_id
-            ).first()
-        elif nome_dia == 'quinta':
-            vaga = db.query(models.Vagas).filter(
-                models.Vagas.quinta == agendamento_data.medico_id,
-                models.Vagas.turno == agendamento_data.turno_id
-            ).first()
-        elif nome_dia == 'sexta':
-            vaga = db.query(models.Vagas).filter(
-                models.Vagas.sexta == agendamento_data.medico_id,
-                models.Vagas.turno == agendamento_data.turno_id
-            ).first()
-        
-        if not vaga:
+        # Buscar sala
+        sala = db.query(models.Salas).filter(models.Salas.id == agendamento_data.sala).first()
+        if not sala:
             return AgendamentoResponse(
                 success=False,
-                message=f"Médico não possui vaga disponível para {nome_dia} neste turno."
+                message="Sala não encontrada."
             )
         
-        # Verificar se há vagas disponíveis
-        if vaga.pacientes_atuais >= vaga.max_pacientes:
-            return AgendamentoResponse(
-                success=False,
-                message="Não há vagas disponíveis para este turno."
-            )
-        
-        # Verificar se paciente já tem agendamento neste dia/horário
-        agendamento_existente = db.query(models.Agendamentos).filter(
-            models.Agendamentos.paciente == agendamento_data.paciente_id,
-            models.Agendamentos.data_consulta == data_consulta,
-            models.Agendamentos.turno == agendamento_data.turno_id
-        ).first()
-        
-        if agendamento_existente:
-            return AgendamentoResponse(
-                success=False,
-                message="Paciente já possui um agendamento neste dia e turno."
-            )
-        
-        # Buscar informações do turno
-        turno = db.query(models.Turnos).filter(models.Turnos.id == agendamento_data.turno_id).first()
+        # Buscar turno
+        turno = db.query(models.Turnos).filter(models.Turnos.id == agendamento_data.turno).first()
         if not turno:
             return AgendamentoResponse(
                 success=False,
                 message="Turno não encontrado."
             )
         
-        # Criar agendamento
+        # Verificar se já existe agendamento neste horário
+        agendamento_existente = db.query(models.Agendamentos).filter(
+            models.Agendamentos.paciente == agendamento_data.paciente,
+            models.Agendamentos.medico == agendamento_data.medico,
+            models.Agendamentos.data_consulta == agendamento_data.data_consulta,
+            models.Agendamentos.hora_inicio == agendamento_data.hora_inicio,
+            models.Agendamentos.hora_fim == agendamento_data.hora_fim,
+            models.Agendamentos.status == 'agendado'
+        ).first()
+        
+        if agendamento_existente:
+            return AgendamentoResponse(
+                success=False,
+                message="Já existe um agendamento para este paciente neste horário."
+            )
+        
+        # Criar novo agendamento
         novo_agendamento = models.Agendamentos(
-            clinica=vaga.clinica,
-            sala=vaga.sala,
-            paciente=agendamento_data.paciente_id,
-            medico=agendamento_data.medico_id,
-            data_consulta=data_consulta,
-            turno=agendamento_data.turno_id,
-            hora_inicio=turno.hora_inicio,
-            hora_fim=turno.hora_fim,
-            status='agendado'
+            clinica=agendamento_data.clinica,
+            sala=agendamento_data.sala,
+            paciente=agendamento_data.paciente,
+            medico=agendamento_data.medico,
+            data_consulta=agendamento_data.data_consulta,
+            turno=agendamento_data.turno,
+            hora_inicio=agendamento_data.hora_inicio,
+            hora_fim=agendamento_data.hora_fim,
+            status=agendamento_data.status
         )
         
         db.add(novo_agendamento)
-        
-        # Incrementar contador de pacientes na vaga
-        vaga.pacientes_atuais += 1
-        
         db.commit()
         db.refresh(novo_agendamento)
         
-        # Buscar sala para resposta
-        sala = db.query(models.Salas).filter(models.Salas.id == vaga.sala).first()
-        
+        # Retornar sucesso
         return AgendamentoResponse(
             success=True,
-            message="Consulta agendada com sucesso!",
+            message="Agendamento realizado com sucesso!",
             agendamento_id=novo_agendamento.id,
             paciente_nome=paciente.nome,
             medico_nome=medico.nome,
-            data_consulta=data_consulta.strftime('%d/%m/%Y'),
-            sala_nome=sala.nome if sala else "Não definida",
+            data_consulta=novo_agendamento.data_consulta.strftime('%d/%m/%Y'),
+            sala_nome=sala.nome,
             turno_nome=turno.nome
         )
         
     except Exception as e:
-        print(f"Erro ao agendar consulta: {e}")
-        db.rollback()
+        print(f"Erro ao criar agendamento: {e}")
         return AgendamentoResponse(
             success=False,
             message=f"Erro ao agendar consulta: {str(e)}"
