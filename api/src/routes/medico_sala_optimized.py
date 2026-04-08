@@ -5,6 +5,7 @@ import json
 
 from ..deps.user import get_db
 from ..models.models import User, Vagas, Clinicas, Salas
+from sqlalchemy.orm import joinedload
 
 router = APIRouter(prefix="/medico-sala", tags=["medico-sala-optimized"])
 
@@ -34,15 +35,19 @@ async def get_medico_sala_optimized(
         vagas = db.query(Vagas).filter(Vagas.clinica == clinica_id).all()
         print(f"DEBUG: Encontradas {len(vagas)} vagas")
         
-        # Coletar IDs únicos de médicos das vagas
+        # Coletar IDs únicos de médicos e salas das vagas
         medicos_ids = set()
+        salas_ids = set()
         for vaga in vagas:
+            if vaga.sala and vaga.sala != 0:
+                salas_ids.add(vaga.sala)
             for dia in ['segunda', 'terca', 'quarta', 'quinta', 'sexta']:
                 medico_id_vaga = getattr(vaga, dia)
                 if medico_id_vaga and medico_id_vaga != 0:
                     medicos_ids.add(medico_id_vaga)
         
         print(f"DEBUG: Medicos IDs encontrados nas vagas: {medicos_ids}")
+        print(f"DEBUG: Salas IDs encontrados nas vagas: {salas_ids}")
         
         # Buscar todos os médicos necessários em lote
         medicos_nomes = {}
@@ -50,7 +55,15 @@ async def get_medico_sala_optimized(
             print(f"DEBUG: Buscando {len(medicos_ids)} médicos em lote")
             medicos_db = db.query(User).filter(User.id.in_(medicos_ids)).all()
             medicos_nomes = {med.id: med.nome for med in medicos_db}
-            print(f"DEBUG: Nomes encontrados: {medicos_nomes}")
+            print(f"DEBUG: Nomes de médicos encontrados: {medicos_nomes}")
+        
+        # Buscar todos os nomes das salas em lote
+        salas_nomes = {}
+        if salas_ids:
+            print(f"DEBUG: Buscando {len(salas_ids)} salas em lote")
+            salas_db = db.query(Salas).filter(Salas.id.in_(salas_ids)).all()
+            salas_nomes = {sala.id: sala.nome for sala in salas_db}
+            print(f"DEBUG: Nomes de salas encontrados: {salas_nomes}")
         
         # Enriquecer vagas com nomes dos médicos
         vagas_enriquecidas = []
@@ -58,7 +71,7 @@ async def get_medico_sala_optimized(
             vaga_dict = {
                 'id': vaga.id,
                 'sala_id': vaga.sala,
-                'sala_nome': 'Sala Padrão',  # Simplificado
+                'sala_nome': salas_nomes.get(vaga.sala, f'Sala {vaga.sala}'),
                 'turno': vaga.turno,
                 'max_pacientes': vaga.max_pacientes,
                 'pacientes_atuais': vaga.pacientes_atuais,
