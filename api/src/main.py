@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from src.routes.user import router as auth_user_router
 from src.routes.pacientes import router as pacientes_router
 from src.routes.medicos import router as medicos_router
-from src.routes.auth_external import router as auth_external_router
 from src.routes.estados import router as estados_router
 from src.routes.especialidades import router as especialidades_router
 from src.routes.tipo_conselho import router as tipo_conselho_router
@@ -57,7 +56,6 @@ async def metrics():
     return metrics_endpoint()
 
 app.include_router(auth_user_router, tags=["Auth Users"])
-app.include_router(auth_external_router, tags=["Auth External"])
 app.include_router(pacientes_router, tags=["Pacientes"])
 app.include_router(medicos_router, tags=["Medicos"])
 app.include_router(estados_router, tags=["Estados"])

@@ -13,84 +13,73 @@ from src.metrics.auth_user import MetricsManager
 from src.auth.auth_rate_limiter import check_rate_limit, login_limiter, signup_limiter, check_brute_force, reset_failed_attempts
 
 router = APIRouter()
+#novo
+from fastapi import APIRouter, HTTPException, status, Request, Depends
+from fastapi.security import OAuth2PasswordRequestForm
+from src.deps.user import SessionDep, CurrentUser
+from src.crud import user as crud
+from src.schemas.user import Token
+from src.auth import security
+from src.auth.auth_rate_limiter import check_rate_limit, login_limiter
+from datetime import timedelta
+from src.database.config import settings
+
+router = APIRouter()
 
 @router.post("/login/access-token")
-async def login(request: Request, db: SessionDep, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
-          ) -> Token:
+async def login_access_token(
+    request: Request,
+    db: SessionDep,
+    form_data: OAuth2PasswordRequestForm = Depends()
+) -> Token:
     """
-    OAuth2 compatible token login, get an access token for future requests
+    OAuth2 compatible token login, get an access token for future requests.
+    Rate limited: 5 attempts per minute per IP.
     """
-    client_ip = request.client.host
-    
-    # Verificar rate limit
-    check_rate_limit(request, login_limiter, "/login/access-token")
-    
-    # Verificar brute force
-    if check_brute_force(client_ip, form_data.username):
-        log_auth_attempt(
-            email=form_data.username,
-            ip=client_ip,
-            success=False,
-            reason="brute_force_detected",
-            endpoint="/login/access-token"
-        )
-        MetricsManager.record_auth_attempt("blocked", client_ip, "/login/access-token")
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="Too many failed attempts. Please try again later."
-        )
-    
+    # Rate limiting check
+    check_rate_limit(request, login_limiter, "login")
+
+    # Authenticate user
     user = crud.authenticate(
-        db=db, 
-        email=form_data.username, 
+        db=db,
+        email=form_data.username,
         password=form_data.password
     )
-    
+
     if not user:
-        log_auth_attempt(
-            email=form_data.username,
-            ip=client_ip,
-            success=False,
-            reason="invalid_credentials",
-            endpoint="/login/access-token"
-        )
-        MetricsManager.record_auth_attempt("failed", client_ip, "/login/access-token")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-        )
-    elif not security.verify_password(form_data.password, user.hashed_password):
-        log_auth_attempt(
-            email=form_data.username,
-            ip=client_ip,
-            success=False,
-            reason="invalid_password",
-            endpoint="/login/access-token"
-        )
-        MetricsManager.record_auth_attempt("failed", client_ip, "/login/access-token")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
+            detail="Email ou senha incorretos",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
-    # Login bem-sucedido
-    reset_failed_attempts(client_ip, form_data.username)
-    log_auth_attempt(
-        email=form_data.username,
-        ip=client_ip,
-        success=True,
-        endpoint="/login/access-token"
-    )
-    MetricsManager.record_auth_attempt("success", client_ip, "/login/access-token")
-    
+
+    # Generate access token
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return Token(
         access_token=security.create_access_token(
             user.id, expires_delta=access_token_expires
         )
     )
-    
+
+@router.post("/auth/validate-token")
+async def validate_token(current_user: CurrentUser) -> dict:
+    """
+    Valida token e retorna dados do usuário
+    """
+    return {
+        "valid": True,
+        "user": {
+            "id": current_user.id,
+            "email": current_user.email,
+            "nome": current_user.nome,
+            "role": current_user.role,
+            "is_active": current_user.is_active
+        }
+    }
+
+
+#antigo
+
 @router.post("/signup", response_model=User)
 async def create_user(request: Request, db: SessionDep, user: UserCreate):
     client_ip = request.client.host
