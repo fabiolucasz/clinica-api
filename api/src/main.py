@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from src.routes.user import router as auth_user_router
+from src.routes.pacientes import router as pacientes_router
+from src.routes.medicos import router as medicos_router
 from src.routes.auth_external import router as auth_external_router
 from src.routes.estados import router as estados_router
 from src.routes.especialidades import router as especialidades_router
@@ -56,6 +58,8 @@ async def metrics():
 
 app.include_router(auth_user_router, tags=["Auth Users"])
 app.include_router(auth_external_router, tags=["Auth External"])
+app.include_router(pacientes_router, tags=["Pacientes"])
+app.include_router(medicos_router, tags=["Medicos"])
 app.include_router(estados_router, tags=["Estados"])
 app.include_router(especialidades_router, tags=["Especialidades"])
 app.include_router(tipo_conselho_router, tags=["Tipo Conselho"])
@@ -68,6 +72,7 @@ app.include_router(medico_sala_optimized_router, tags=["Medico Sala Optimized"])
 app.include_router(medico_sala_simple_router, tags=["Medico Sala Simple"])
 app.include_router(agenda_router, tags=["Agenda"])
 app.include_router(agendamento_router, tags=["Agendamento"])
+
 
 
 
