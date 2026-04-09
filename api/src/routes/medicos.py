@@ -20,7 +20,7 @@ router = APIRouter()
 @router.get("/medicos", response_model=list[MedicoResponse])
 async def get_medicos(request: Request, current_user: CurrentUser, db: SessionDep):
     # Verificar se o usuário é admin
-    if current_user.role != "admin":
+    if current_user.role != "administrador":
         raise HTTPException(status_code=403, detail="Acesso negado. Apenas administradores podem acessar este recurso.")
     
     start_time = time.time()
@@ -57,7 +57,7 @@ async def get_medicos(request: Request, current_user: CurrentUser, db: SessionDe
 @router.get("/medicos/completo", response_model=list[MedicoResponseCompleto])
 async def get_medicos_completo(request: Request, current_user: CurrentUser, db: SessionDep):
     # Verificar se o usuário é admin
-    if current_user.role != "admin":
+    if current_user.role != "administrador":
         raise HTTPException(status_code=403, detail="Acesso negado. Apenas administradores podem acessar este recurso.")
     
     start_time = time.time()
@@ -95,7 +95,7 @@ async def get_medicos_completo(request: Request, current_user: CurrentUser, db: 
 @router.get("/medicos/{id}", response_model=MedicoResponse)
 async def get_medico_by_id(id: int, current_user: CurrentUser, db: SessionDep):
     # Verificar se o usuário é admin
-    if current_user.role != "admin":
+    if current_user.role != "administrador":
         raise HTTPException(status_code=403, detail="Acesso negado. Apenas administradores podem acessar este recurso.")
     
     try:
@@ -114,7 +114,7 @@ async def get_medico_by_id(id: int, current_user: CurrentUser, db: SessionDep):
 @router.post("/medicos", response_model=MedicoResponse)
 async def create_medico(medico: MedicoCreate, current_user: CurrentUser, db: SessionDep):
     # Verificar se o usuário é admin
-    if current_user.role != "admin":
+    if current_user.role != "administrador":
         raise HTTPException(status_code=403, detail="Acesso negado. Apenas administradores podem cadastrar médicos.")
     
     try:
@@ -136,7 +136,7 @@ async def create_medico(medico: MedicoCreate, current_user: CurrentUser, db: Ses
 @router.put("/medicos/{id}", response_model=MedicoResponse)
 async def update_medico(id: int, medico: MedicoUpdate, current_user: CurrentUser, db: SessionDep):
     # Verificar se o usuário é admin
-    if current_user.role != "admin":
+    if current_user.role != "administrador":
         raise HTTPException(status_code=403, detail="Acesso negado. Apenas administradores podem editar médicos.")
     
     try:
@@ -155,7 +155,7 @@ async def update_medico(id: int, medico: MedicoUpdate, current_user: CurrentUser
 @router.delete("/medicos/{id}")
 async def delete_medico(id: int, current_user: CurrentUser, db: SessionDep):
     # Verificar se o usuário é admin
-    if current_user.role != "admin":
+    if current_user.role != "administrador":
         raise HTTPException(status_code=403, detail="Acesso negado. Apenas administradores podem excluir médicos.")
     
     try:

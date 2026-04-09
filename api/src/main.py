@@ -14,6 +14,7 @@ from src.routes.medico_sala_optimized import router as medico_sala_optimized_rou
 from src.routes.medico_sala_simple import router as medico_sala_simple_router
 from src.routes.agenda import router as agenda_router
 from src.routes.agendamento import router as agendamento_router
+from src.routes.dashboard import router as dashboard_router
 from src.metrics.auth_user import metrics_endpoint
 from src.database.connection import engine, Base
 from src.populate_db import populate_database
@@ -70,6 +71,7 @@ app.include_router(medico_sala_optimized_router, tags=["Medico Sala Optimized"])
 app.include_router(medico_sala_simple_router, tags=["Medico Sala Simple"])
 app.include_router(agenda_router, tags=["Agenda"])
 app.include_router(agendamento_router, tags=["Agendamento"])
+app.include_router(dashboard_router, tags=["Dashboard"])
 
 
 

@@ -52,7 +52,7 @@ async def get_pacientes(request: Request, current_user: CurrentUser, db: Session
 @router.get("/pacientes/{id}", response_model=PacienteResponse)
 async def get_paciente_by_id(id: int, current_user: CurrentUser, db: SessionDep):
     # Verificar se o usuário é admin
-    if current_user.role != "admin":
+    if current_user.role != "administrador":
         raise HTTPException(status_code=403, detail="Acesso negado. Apenas administradores podem acessar este recurso.")
     
     try:
@@ -71,7 +71,7 @@ async def get_paciente_by_id(id: int, current_user: CurrentUser, db: SessionDep)
 @router.post("/pacientes", response_model=PacienteResponse)
 async def create_paciente(paciente: PacienteCreate, current_user: CurrentUser, db: SessionDep):
     # Verificar se o usuário é admin
-    if current_user.role != "admin":
+    if current_user.role != "administrador":
         raise HTTPException(status_code=403, detail="Acesso negado. Apenas administradores podem cadastrar pacientes.")
     
     try:
@@ -86,7 +86,7 @@ async def create_paciente(paciente: PacienteCreate, current_user: CurrentUser, d
 @router.put("/pacientes/{id}", response_model=PacienteUpdate)
 async def update_paciente(id: int, paciente: PacienteUpdate, current_user: CurrentUser, db: SessionDep):
     # Verificar se o usuário é admin
-    if current_user.role != "admin":
+    if current_user.role != "administrador":
         raise HTTPException(status_code=403, detail="Acesso negado. Apenas administradores podem editar pacientes.")
     
     try:
@@ -105,7 +105,7 @@ async def update_paciente(id: int, paciente: PacienteUpdate, current_user: Curre
 @router.delete("/pacientes/{id}")
 async def delete_paciente(id: int, current_user: CurrentUser, db: SessionDep):
     # Verificar se o usuário é admin
-    if current_user.role != "admin":
+    if current_user.role != "administrador":
         raise HTTPException(status_code=403, detail="Acesso negado. Apenas administradores podem excluir pacientes.")
     
     try:
