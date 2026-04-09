@@ -50,10 +50,18 @@ async def get_pacientes(request: Request, current_user: CurrentUser, db: Session
         )
 
 @router.get("/pacientes/{id}", response_model=PacienteResponse)
-async def get_paciente_by_id(id: int, db: SessionDep):
+async def get_paciente_by_id(id: int, current_user: CurrentUser, db: SessionDep):
+    # Verificar se o usuário é admin
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado. Apenas administradores podem acessar este recurso.")
+    
     try:
         paciente = crud.get_paciente_by_id(db, id)
+        if not paciente:
+            raise HTTPException(status_code=404, detail="Paciente não encontrado")
         return paciente
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -61,10 +69,14 @@ async def get_paciente_by_id(id: int, db: SessionDep):
         )
 
 @router.post("/pacientes", response_model=PacienteResponse)
-async def create_paciente(paciente: PacienteCreate, db: SessionDep):
+async def create_paciente(paciente: PacienteCreate, current_user: CurrentUser, db: SessionDep):
+    # Verificar se o usuário é admin
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado. Apenas administradores podem cadastrar pacientes.")
+    
     try:
-        paciente = crud.create_paciente(db, paciente)
-        return paciente
+        created_paciente = crud.create_paciente(db, paciente)
+        return created_paciente
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -72,21 +84,37 @@ async def create_paciente(paciente: PacienteCreate, db: SessionDep):
         )
 
 @router.put("/pacientes/{id}", response_model=PacienteUpdate)
-async def update_paciente(id: int, paciente: PacienteUpdate, db: SessionDep):
+async def update_paciente(id: int, paciente: PacienteUpdate, current_user: CurrentUser, db: SessionDep):
+    # Verificar se o usuário é admin
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado. Apenas administradores podem editar pacientes.")
+    
     try:
-        paciente = crud.update_paciente(db, id, paciente)
-        return paciente
-    except:
+        updated_paciente = crud.update_paciente(db, id, paciente)
+        if not updated_paciente:
+            raise HTTPException(status_code=404, detail="Paciente não encontrado")
+        return updated_paciente
+    except HTTPException:
+        raise
+    except Exception as e:
         raise HTTPException(
             status_code=500,
             detail="Internal server error"
         )
 
 @router.delete("/pacientes/{id}")
-async def delete_paciente(id: int, db: SessionDep):
+async def delete_paciente(id: int, current_user: CurrentUser, db: SessionDep):
+    # Verificar se o usuário é admin
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado. Apenas administradores podem excluir pacientes.")
+    
     try:
-        paciente = crud.delete_paciente(db, id)
-        return paciente
+        deleted_paciente = crud.delete_paciente(db, id)
+        if not deleted_paciente:
+            raise HTTPException(status_code=404, detail="Paciente não encontrado")
+        return {"message": "Paciente excluído com sucesso"}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500,

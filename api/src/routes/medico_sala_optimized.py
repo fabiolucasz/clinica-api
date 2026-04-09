@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List, Dict, Any
 import json
 
-from ..deps.user import get_db
+from ..deps.user import get_db, CurrentUser
 from ..models.models import User, Vagas, Clinicas, Salas
 from sqlalchemy.orm import joinedload
 
@@ -12,6 +12,7 @@ router = APIRouter(prefix="/medico-sala", tags=["medico-sala-optimized"])
 @router.get("/optimized/{medico_id}")
 async def get_medico_sala_optimized(
     medico_id: int,
+    current_user: CurrentUser,
     clinica_id: int = 1,
     db: Session = Depends(get_db)
 ):

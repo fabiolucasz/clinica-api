@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import Dict, Any
 import json
 
-from ..deps.user import get_db
+from ..deps.user import get_db, CurrentUser
 from ..models.models import User, Vagas
 
 router = APIRouter(prefix="/medico-sala-simple", tags=["medico-sala-simple"])
@@ -11,6 +11,7 @@ router = APIRouter(prefix="/medico-sala-simple", tags=["medico-sala-simple"])
 @router.get("/simple/{medico_id}")
 async def get_medico_sala_simple(
     medico_id: int,
+    current_user: CurrentUser,
     db: Session = Depends(get_db)
 ):
     """
