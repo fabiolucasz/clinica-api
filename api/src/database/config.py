@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     HOST: str
     USER: str
     PORT: int
-    DATABASE_NAME: str
+    DBNAME: str
     PASSWORD: str
     
     @computed_field
@@ -43,13 +43,6 @@ class Settings(BaseSettings):
         if self.ENVIRONMENT == "dev":
             return self.DATABASE_URL
         else:
-            return MultiHostUrl.build(
-                scheme=self.SCHEME,
-                username=self.USER,
-                password=self.PASSWORD,
-                host=self.HOST,
-                port=self.PORT,
-                path=self.DATABASE_NAME,
-            )
+            return f"{self.SCHEME}://{self.USER}:{self.PASSWORD}@{self.HOST}:{self.PORT}/{self.DBNAME}"
 
 settings = Settings() #type: ignore
