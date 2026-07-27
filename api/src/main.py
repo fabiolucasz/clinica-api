@@ -28,7 +28,7 @@ app = FastAPI()
 Base.metadata.create_all(bind=engine)
 
 # Popular banco com dados iniciais
-populate_database()
+#populate_database()
 
 @app.get("/")
 async def home():
