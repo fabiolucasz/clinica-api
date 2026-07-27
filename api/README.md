@@ -200,7 +200,3 @@ Certifique-se de que:
 ### Erro de Permissão (403)
 
 Verifique se o usuário tem a role necessária para acessar o recurso.
-
-## Licença
-
-[Adicionar licença aqui]
