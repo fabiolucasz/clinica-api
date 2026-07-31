@@ -12,11 +12,19 @@ API FastAPI para gestão de clínica médica com autenticação JWT, integraçã
 - **Supabase Storage**: Armazenamento de arquivos (imagens, documentos)
 - **Pytest**: Framework de testes
 - **uv**: Gerenciador de pacotes Python
+- **Ruff**: Linter para Python
+- **Black**: Formatador de código Python
+- **GitHub Actions**: CI/CD para automação de testes e qualidade
 
 ## Estrutura do Projeto
 
 ```
 api/
+├── .github/
+│   └── workflows/     # Workflows do GitHub Actions (CI/CD)
+│       ├── api.yml    # Testes da API
+│       ├── web.yml    # Testes da web (Django)
+│       └── lint.yml   # Linting e formatação
 ├── src/
 │   ├── auth/          # Autenticação e segurança
 │   ├── crud/          # Operações de banco de dados
@@ -159,6 +167,68 @@ Os testes usam fixtures do pytest para:
 - Mock de autenticação e usuários
 - Cliente de teste com token de autenticação
 - Dados compartilhados entre testes
+
+## CI/CD
+
+O projeto utiliza GitHub Actions para automação de CI/CD (Continuous Integration/Continuous Delivery). Os workflows estão configurados em `.github/workflows/`:
+
+### Workflows Disponíveis
+
+#### 1. API Tests (`api.yml`)
+Executa testes da API FastAPI:
+- Instala dependências com `uv`
+- Roda todos os testes com `pytest`
+- Faz upload de relatórios de coverage
+- **Trigger**: Push e Pull Request para branches `main` e `develop`
+
+#### 2. Web Tests (`web.yml`)
+Executa testes da aplicação Django (web):
+- Instala dependências com `uv`
+- Roda testes Django com `manage.py test`
+- Verifica migrações pendentes
+- **Trigger**: Push e Pull Request para branches `main` e `develop`
+
+#### 3. Lint (`lint.yml`)
+Verifica qualidade do código:
+- Executa `ruff` para linting
+- Executa `black` para verificação de formatação
+- **Trigger**: Push e Pull Request para branches `main` e `develop`
+
+### Executar Workflows Localmente
+
+Para testar os workflows localmente antes do push, use `act` (GitHub Actions local runner):
+
+```bash
+# Instalar act (se não tiver)
+curl https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
+
+# Rodar workflow específico
+act -W .github/workflows/api.yml
+act -W .github/workflows/web.yml
+act -W .github/workflows/lint.yml
+```
+
+### Configuração de Lint
+
+O projeto usa `ruff` e `black` com configurações específicas em `pyproject.toml`:
+
+```toml
+[tool.ruff.lint]
+ignore = [
+    "B008",  # Aceito em FastAPI (Depends, File em argument defaults)
+    "BLE001",  # Blind exception aceito para simplificação
+    "EXE002",  # Arquivos executáveis sem shebang
+    "PLW0602",  # Variáveis globais em testes
+]
+```
+
+### Benefícios do CI/CD
+
+- **Qualidade**: Testes automáticos em cada commit
+- **Detecção precoce**: Erros são encontrados antes da produção
+- **Padronização**: Linting garante consistência do código
+- **Integração**: Testes de API e web integrados
+- **Coverage**: Relatórios de cobertura de testes
 
 ## Supabase Storage
 
