@@ -126,17 +126,17 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.now(UTC))
     updated_at = Column(DateTime, default=datetime.now(UTC), onupdate=datetime.now(UTC))
 
-    vagas_segunda = relationship("Vagas", foreign_keys="Vagas.segunda")
-    vagas_terca = relationship("Vagas", foreign_keys="Vagas.terca")
-    vagas_quarta = relationship("Vagas", foreign_keys="Vagas.quarta")
-    vagas_quinta = relationship("Vagas", foreign_keys="Vagas.quinta")
-    vagas_sexta = relationship("Vagas", foreign_keys="Vagas.sexta")
+    vagas_segunda = relationship("Vagas", foreign_keys="Vagas.segunda", back_populates="medico_segunda")
+    vagas_terca = relationship("Vagas", foreign_keys="Vagas.terca", back_populates="medico_terca")
+    vagas_quarta = relationship("Vagas", foreign_keys="Vagas.quarta", back_populates="medico_quarta")
+    vagas_quinta = relationship("Vagas", foreign_keys="Vagas.quinta", back_populates="medico_quinta")
+    vagas_sexta = relationship("Vagas", foreign_keys="Vagas.sexta", back_populates="medico_sexta")
 
     agendamentos_paciente = relationship(
-        "Agendamentos", foreign_keys="Agendamentos.paciente"
+        "Agendamentos", foreign_keys="Agendamentos.paciente", back_populates="paciente_rel"
     )
     agendamentos_medico = relationship(
-        "Agendamentos", foreign_keys="Agendamentos.medico"
+        "Agendamentos", foreign_keys="Agendamentos.medico", back_populates="medico_rel"
     )
     estado_rel = relationship("Estados", foreign_keys=[estado])
     uf_conselho_rel = relationship("Estados", foreign_keys=[uf_conselho])
@@ -170,9 +170,9 @@ class Clinicas(Base):
     updated_at = Column(DateTime, default=datetime.now(UTC), onupdate=datetime.now(UTC))
 
     estado_rel = relationship("Estados")
-    salas = relationship("Salas")
-    vagas = relationship("Vagas")
-    agendamentos = relationship("Agendamentos")
+    salas = relationship("Salas", back_populates="clinica_rel")
+    vagas = relationship("Vagas", back_populates="clinica_rel")
+    agendamentos = relationship("Agendamentos", back_populates="clinica_rel")
     calendario_clinica = relationship("CalendarioClinica", back_populates="clinica")
 
 
@@ -186,9 +186,9 @@ class Salas(Base):
     nome = Column(String(100))
     clinica = Column(Integer, ForeignKey("clinicas.id"))
 
-    clinica_rel = relationship("Clinicas")
-    vagas = relationship("Vagas")
-    agendamentos = relationship("Agendamentos")
+    clinica_rel = relationship("Clinicas", back_populates="salas")
+    vagas = relationship("Vagas", back_populates="sala_rel")
+    agendamentos = relationship("Agendamentos", back_populates="sala_rel")
 
     __table_args__ = (UniqueConstraint("nome", "clinica", name="uq_sala_nome_clinica"),)
 
@@ -215,14 +215,14 @@ class Vagas(Base):
     max_pacientes = Column(Integer, default=25)
     pacientes_atuais = Column(Integer, default=0)
 
-    clinica_rel = relationship("Clinicas")
-    sala_rel = relationship("Salas")
+    clinica_rel = relationship("Clinicas", back_populates="vagas")
+    sala_rel = relationship("Salas", back_populates="vagas")
     turno_rel = relationship("Turnos")
-    medico_segunda = relationship("User", foreign_keys=[segunda])
-    medico_terca = relationship("User", foreign_keys=[terca])
-    medico_quarta = relationship("User", foreign_keys=[quarta])
-    medico_quinta = relationship("User", foreign_keys=[quinta])
-    medico_sexta = relationship("User", foreign_keys=[sexta])
+    medico_segunda = relationship("User", foreign_keys=[segunda], back_populates="vagas_segunda")
+    medico_terca = relationship("User", foreign_keys=[terca], back_populates="vagas_terca")
+    medico_quarta = relationship("User", foreign_keys=[quarta], back_populates="vagas_quarta")
+    medico_quinta = relationship("User", foreign_keys=[quinta], back_populates="vagas_quinta")
+    medico_sexta = relationship("User", foreign_keys=[sexta], back_populates="vagas_sexta")
 
     __table_args__ = (UniqueConstraint("sala", "turno"),)
 
@@ -260,11 +260,11 @@ class Agendamentos(Base):
     hora_fim = Column(String(5), nullable=False)
     status = Column(String(10), default="agendado")
 
-    clinica_rel = relationship("Clinicas")
-    sala_rel = relationship("Salas")
+    clinica_rel = relationship("Clinicas", back_populates="agendamentos")
+    sala_rel = relationship("Salas", back_populates="agendamentos")
     turno_rel = relationship("Turnos")
-    paciente_rel = relationship("User", foreign_keys=[paciente])
-    medico_rel = relationship("User", foreign_keys=[medico])
+    paciente_rel = relationship("User", foreign_keys=[paciente], back_populates="agendamentos_paciente")
+    medico_rel = relationship("User", foreign_keys=[medico], back_populates="agendamentos_medico")
 
 
 # Model HorariosConsultas
