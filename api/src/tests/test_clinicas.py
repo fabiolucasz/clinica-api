@@ -1,5 +1,5 @@
 """Testes para o router de clinicas"""
-from fastapi.testclient import TestClient
+
 
 def test_get_clinicas(authenticated_client):
     """Testa listagem de clinicas"""
@@ -7,6 +7,7 @@ def test_get_clinicas(authenticated_client):
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
+
 
 def test_get_clinica_by_id(authenticated_client):
     """Testa buscar clinica por ID"""

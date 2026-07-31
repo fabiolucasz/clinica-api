@@ -1,5 +1,5 @@
 """Testes para o router de pacientes"""
-from fastapi.testclient import TestClient
+
 
 def test_get_pacientes(authenticated_client):
     """Testa listagem de pacientes"""
@@ -9,6 +9,7 @@ def test_get_pacientes(authenticated_client):
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
+
 
 def test_create_paciente(authenticated_client):
     """Testa criação de paciente"""
@@ -27,9 +28,9 @@ def test_create_paciente(authenticated_client):
         "estado": 0,
         "role": "paciente",
         "foto_perfil": "string",
-        "password": "string"
+        "password": "string",
     }
-    
+
     response = authenticated_client.post("/pacientes", json=paciente_data)
     print(f"Status: {response.status_code}")
     print(f"Response: {response.text}")

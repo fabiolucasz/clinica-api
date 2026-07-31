@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+
 class VagasBase(BaseModel):
     clinica: int
     sala: int
@@ -13,8 +14,10 @@ class VagasBase(BaseModel):
     max_pacientes: int = 25
     pacientes_atuais: int = 0
 
+
 class VagasCreate(VagasBase):
     pass
+
 
 class VagasUpdate(BaseModel):
     status: str | None = None
@@ -26,7 +29,8 @@ class VagasUpdate(BaseModel):
     max_pacientes: int | None = None
     pacientes_atuais: int | None = None
 
+
 class Vagas(VagasBase):
     id: int
-    
+
     model_config = {"from_attributes": True}

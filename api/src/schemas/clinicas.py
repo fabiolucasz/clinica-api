@@ -1,9 +1,11 @@
-from pydantic import BaseModel, EmailStr
 from datetime import datetime
+
+from pydantic import BaseModel, EmailStr
+
 
 class ClinicasBase(BaseModel):
     nome: str
-    cnpj: str = '00.000.000/0000-00'
+    cnpj: str = "00.000.000/0000-00"
     email: EmailStr
     celular: str
     celular2: str | None = None
@@ -14,8 +16,10 @@ class ClinicasBase(BaseModel):
     cidade: str
     estado: int
 
+
 class ClinicasCreate(ClinicasBase):
     pass
+
 
 class ClinicasUpdate(BaseModel):
     nome: str | None = None
@@ -30,9 +34,10 @@ class ClinicasUpdate(BaseModel):
     cidade: str | None = None
     estado: int | None = None
 
+
 class Clinicas(ClinicasBase):
     id: int
     created_at: datetime
     updated_at: datetime
-    
+
     model_config = {"from_attributes": True}

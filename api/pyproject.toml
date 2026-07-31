@@ -20,4 +20,14 @@ dependencies = [
     "httpx>=0.28.1",
     "pytest-mock>=3.15.1",
     "boto3>=1.43.47",
+    "ruff>=0.16.0",
+    "black>=26.5.1",
+]
+
+[tool.ruff.lint]
+ignore = [
+    "B008",  # Do not perform function call in argument defaults (aceito em FastAPI)
+    "BLE001",  # Do not catch blind exception (se você quiser manter)
+    "EXE002",  # The file is executable but no shebang is present
+    "PLW0602",  # Using global variable but no assignment (aceito em testes)
 ]

@@ -1,5 +1,5 @@
 """Testes para o router de agenda"""
-from fastapi.testclient import TestClient
+
 
 def test_agenda_completa(authenticated_client):
     """Testa agenda completa"""

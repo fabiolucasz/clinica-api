@@ -1,5 +1,7 @@
-from pydantic import BaseModel
 from datetime import datetime
+
+from pydantic import BaseModel
+
 
 class AgendamentosBase(BaseModel):
     clinica: int
@@ -10,8 +12,10 @@ class AgendamentosBase(BaseModel):
     turno: int
     status: str = "agendado"
 
+
 class AgendamentosCreate(AgendamentosBase):
     pass
+
 
 class AgendamentosUpdate(BaseModel):
     status: str | None = None
@@ -20,7 +24,8 @@ class AgendamentosUpdate(BaseModel):
     hora_inicio: str | None = None
     hora_fim: str | None = None
 
+
 class Agendamentos(AgendamentosBase):
     id: int
-    
+
     model_config = {"from_attributes": True}

@@ -1,17 +1,26 @@
-
 from sqlalchemy.orm import Session
+
+from src.auth.security import get_password_hash
 from src.models import models
 from src.schemas.user import PacienteCreate, PacienteUpdate
-from src.auth.security import get_password_hash
 
-#Pacientes
+
+# Pacientes
 def get_pacientes(db: Session, skip: int = 0, limit: int = 100):
-    pacientes = db.query(models.User).filter(models.User.role == "paciente").offset(skip).limit(limit).all()
+    pacientes = (
+        db.query(models.User)
+        .filter(models.User.role == "paciente")
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
     return pacientes
+
 
 def get_paciente_by_id(db: Session, id: int):
     paciente = db.query(models.User).filter(models.User.id == id).first()
     return paciente
+
 
 def create_paciente(db: Session, paciente: PacienteCreate):
     db_paciente = models.User(
@@ -29,12 +38,13 @@ def create_paciente(db: Session, paciente: PacienteCreate):
         cidade=paciente.cidade,
         estado=paciente.estado,
         role="paciente",
-        foto_perfil=paciente.foto_perfil
+        foto_perfil=paciente.foto_perfil,
     )
     db.add(db_paciente)
     db.commit()
     db.refresh(db_paciente)
     return db_paciente
+
 
 def update_paciente(db: Session, id: int, paciente: PacienteUpdate):
     db_paciente = get_paciente_by_id(db, id=id)
@@ -46,6 +56,7 @@ def update_paciente(db: Session, id: int, paciente: PacienteUpdate):
     db.commit()
     db.refresh(db_paciente)
     return db_paciente
+
 
 def delete_paciente(db: Session, id: int):
     db_paciente = get_paciente_by_id(db, id=id)
