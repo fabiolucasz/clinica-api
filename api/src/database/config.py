@@ -1,42 +1,24 @@
 import os
 
-
-
 from pydantic import PostgresDsn, computed_field
-
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
-
 env_path = os.path.join(
-
     os.path.dirname(os.path.dirname(os.path.dirname(__file__))), ".env"
-
 )
-
 
 
 print(env_path)
 
 
-
-
-
 class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(
-
         env_file=env_path,
-
         env_file_encoding="utf-8",
-
         env_ignore_empty=True,
-
         extra="ignore",
-
     )
-
-
 
     ENVIRONMENT: str = "dev"
 
@@ -49,8 +31,6 @@ class Settings(BaseSettings):
     SECRET_KEY: str
 
     ALGORITHM: str
-
-
 
     # PostgreSQL for production (optional for dev)
 
@@ -66,12 +46,8 @@ class Settings(BaseSettings):
 
     PASSWORD: str
 
-
-
     @computed_field
-
     @property
-
     def server_host(self) -> str:
 
         if self.ENVIRONMENT == "dev":
@@ -80,12 +56,8 @@ class Settings(BaseSettings):
 
         return f"https://{self.DOMAIN}"
 
-
-
     @computed_field
-
     @property
-
     def SQLALCHEMY_DATABASE_URI(self) -> str | PostgresDsn:
 
         if self.ENVIRONMENT == "dev":
@@ -97,8 +69,4 @@ class Settings(BaseSettings):
             return f"{self.SCHEME}://{self.USER}:{self.PASSWORD}@{self.HOST}:{self.PORT}/{self.DATABASE_NAME}"
 
 
-
-
-
 settings = Settings()  # type: ignore
-
