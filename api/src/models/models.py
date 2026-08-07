@@ -306,3 +306,22 @@ class HorariosConsultas(Base):
 
     # Relacionamento
     turno_rel = relationship("Turnos", back_populates="horarios_consultas")
+
+
+# Model Lead para dados de pacientes extraídos do chat
+class Lead(Base):
+    __tablename__ = "leads"
+
+    id = Column(
+        Integer, primary_key=True, index=True, nullable=False, autoincrement=True
+    )
+    name = Column(String(200), nullable=False)
+    whatsapp = Column(String(20), nullable=False, unique=True, index=True)
+    birth_date = Column(String(20), nullable=True)
+    desired_specialty = Column(String(100), nullable=True)
+    insurance = Column(String(100), nullable=True)
+    status = Column(
+        String(50), default="aguardando"
+    )  # aguardando, contato_iniciado, agendado, concluido
+    created_at = Column(DateTime, default=datetime.now(UTC))
+    updated_at = Column(DateTime, default=datetime.now(UTC), onupdate=datetime.now(UTC))

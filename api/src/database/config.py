@@ -26,25 +26,25 @@ class Settings(BaseSettings):
 
     DATABASE_URL: str = "sqlite:///./clinica.db"
 
-    ACCESS_TOKEN_EXPIRE_MINUTES: int
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
-    SECRET_KEY: str
+    SECRET_KEY: str = "dev-secret-key-change-in-production"
 
-    ALGORITHM: str
+    ALGORITHM: str = "HS256"
 
     # PostgreSQL for production (optional for dev)
 
     SCHEME: str = "postgresql+psycopg2"
+    HOST: str = "localhost"
+    USER: str = "postgres"
+    PORT: int = 5432
+    DATABASE_NAME: str = "clinica_db"
+    PASSWORD: str = "postgres"
 
-    HOST: str
-
-    USER: str
-
-    PORT: int
-
-    DATABASE_NAME: str
-
-    PASSWORD: str
+    # AI Configuration
+    AI_API_KEY: str = ""
+    AI_BASE_URL: str = "https://api.openai.com/v1"
+    AI_MODEL: str = "gpt-4o-mini"
 
     @computed_field
     @property

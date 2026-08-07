@@ -6,6 +6,7 @@ from src.routes.agenda import router as agenda_router
 from src.routes.agendamento import router as agendamento_router
 from src.routes.agendamentos import router as agendamentos_router
 from src.routes.calendario_clinica import router as calendario_clinica_router
+from src.routes.chat import router as chat_router
 from src.routes.clinicas import router as clinicas_router
 from src.routes.dashboard import router as dashboard_router
 from src.routes.especialidades import router as especialidades_router
@@ -54,6 +55,7 @@ async def metrics():
 
 
 app.include_router(auth_user_router, tags=["Auth Users"])
+app.include_router(chat_router, tags=["Chat"])
 app.include_router(pacientes_router, tags=["Pacientes"])
 app.include_router(medicos_router, tags=["Medicos"])
 app.include_router(estados_router, tags=["Estados"])
