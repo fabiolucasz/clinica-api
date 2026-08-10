@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     PASSWORD: str = "postgres"
 
     # AI Configuration
-    AI_API_KEY: str = ""
+    AI_API_KEY: str = "mock-key"
     AI_BASE_URL: str = "https://api.openai.com/v1"
     AI_MODEL: str = "gpt-4o-mini"
 

@@ -11,7 +11,10 @@ class AIServiceError(Exception):
     """Exceção customizada para erros do serviço de IA"""
 
 
-client = OpenAI(base_url=settings.AI_BASE_URL, api_key=settings.AI_API_KEY)
+client = OpenAI(
+    base_url=settings.AI_BASE_URL,
+    api_key=settings.AI_API_KEY or "mock-key",
+)
 
 
 def safe_chat_completion(messages, model=None, max_retries=5, **kwargs):
