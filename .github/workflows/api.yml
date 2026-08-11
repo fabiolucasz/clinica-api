@@ -1,0 +1,51 @@
+name: api
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test-api:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    
+    - name: Install uv
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+    
+    - name: Install dependencies
+      run: uv sync
+
+    - name: Set up environment variables
+      run: |
+        echo "DATABASE_URL=sqlite:///./test.db" >> $GITHUB_ENV
+        echo "SECRET_KEY=test-secret-key-for-testing" >> $GITHUB_ENV
+        echo "ALGORITHM=HS256" >> $GITHUB_ENV
+        echo "ACCESS_TOKEN_EXPIRE_MINUTES=30" >> $GITHUB_ENV
+        echo "HOST=localhost" >> $GITHUB_ENV
+        echo "PORT=5432" >> $GITHUB_ENV
+        echo "DATABASE_NAME=test_db" >> $GITHUB_ENV
+        echo "PASSWORD=test_password" >> $GITHUB_ENV
+        echo "AI_API_KEY=test-api-key" >> $GITHUB_ENV
+        echo "AI_BASE_URL=https://api.openai.com/v1" >> $GITHUB_ENV
+    
+    - name: Run tests
+      run: uv run pytest src/tests/ -v
+    
+    - name: Upload coverage reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: api/htmlcov/
