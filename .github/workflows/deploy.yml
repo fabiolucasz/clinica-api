@@ -1,0 +1,85 @@
+name: Deploy to Amazon ECS
+
+on:
+  push:
+    branches: [ main ]
+
+# Permissões obrigatórias para autenticação OIDC
+permissions:
+  id-token: write   # Permite que o GitHub gere o token OIDC
+  contents: read    # Necessário para actions/checkout
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      # 1. Checkout do código
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Autenticação na AWS via OIDC (sem chaves estáticas)
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      # 3. Login no Amazon ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # 4. Build, tag e push da imagem Docker para o ECR
+      - name: Build, tag and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      # 5. Baixa a task definition atual do ECS (evita manter arquivo no repo)
+      - name: Download current ECS task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition ${{ secrets.ECS_TASK_DEFINITION }} \
+            --query taskDefinition \
+            > task-definition.json
+
+      # 6. Renderiza nova revisão da task definition com a imagem atualizada
+      - name: Render new ECS task definition with updated image
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ secrets.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+          environment-variables: |
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            SECRET_KEY=${{ secrets.SECRET_KEY }}
+            ALGORITHM=${{ secrets.ALGORITHM }}
+            ACCESS_TOKEN_EXPIRE_MINUTES=${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}
+            DOMAIN=${{ secrets.DOMAIN }}
+            ENVIRONMENT=production
+            AI_API_KEY=${{ secrets.AI_API_KEY }}
+            SUPABASE_STORAGE_URL=${{ secrets.SUPABASE_STORAGE_URL }}
+            SUPABASE_S3_ENDPOINT=${{ secrets.SUPABASE_S3_ENDPOINT }}
+            SUPABASE_ACCESS_KEY=${{ secrets.SUPABASE_ACCESS_KEY }}
+            SUPABASE_SECRET_KEY=${{ secrets.SUPABASE_SECRET_KEY }}
+            SUPABASE_REGION=${{ secrets.SUPABASE_REGION }}
+            SUPABASE_BUCKET=${{ secrets.SUPABASE_BUCKET }}
+
+      # 7. Registra a nova task definition e faz deploy no serviço ECS
+      - name: Deploy to Amazon ECS service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ secrets.ECS_SERVICE }}
+          cluster: default
+          wait-for-service-stability: true
