@@ -44,13 +44,12 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      # 5. Baixa a task definition atual do ECS (evita manter arquivo no repo)
-      - name: Download current ECS task definition
+      # 5. Garante que o Log Group do CloudWatch existe
+      - name: Ensure CloudWatch log group exists
         run: |
-          aws ecs describe-task-definition \
-            --task-definition ${{ secrets.ECS_TASK_DEFINITION }} \
-            --query taskDefinition \
-            > task-definition.json
+          aws logs create-log-group \
+            --log-group-name /ecs/clinica-api \
+            --region us-east-1 || true
 
       # 6. Renderiza nova revisão da task definition com a imagem atualizada
       - name: Render new ECS task definition with updated image
