@@ -211,3 +211,4 @@ __marimo__/
 
 
 *.json
+!task-definition.json

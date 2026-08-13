@@ -1,0 +1,32 @@
+{
+  "family": "clinica-api-task",
+  "networkMode": "bridge",
+  "requiresCompatibilities": ["EC2"],
+  "executionRoleArn": "arn:aws:iam::117211782249:role/ecsTaskExecutionRole",
+  "cpu": "512",
+  "memory": "512",
+  "containerDefinitions": [
+    {
+      "name": "clinica-api",
+      "image": "117211782249.dkr.ecr.us-east-1.amazonaws.com/clinica-api:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8001,
+          "hostPort": 8001,
+          "protocol": "tcp"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/clinica-api",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "environment": [],
+      "secrets": []
+    }
+  ]
+}
