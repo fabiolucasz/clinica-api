@@ -20,6 +20,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # DEBUG: Mostra o sub claim real do OIDC (remover após confirmar)
+      - name: Debug OIDC token subject
+        run: |
+          OIDC_TOKEN=$(curl -sS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com")
+          echo "Raw token response received"
+          PAYLOAD=$(echo "$OIDC_TOKEN" | python3 -c "
+          import sys, json, base64
+          data = json.load(sys.stdin)
+          token = data.get('value', '')
+          parts = token.split('.')
+          if len(parts) >= 2:
+              pad = 4 - len(parts[1]) % 4
+              payload = base64.urlsafe_b64decode(parts[1] + '=' * pad)
+              claims = json.loads(payload)
+              print('sub:', claims.get('sub', 'N/A'))
+              print('iss:', claims.get('iss', 'N/A'))
+              print('aud:', claims.get('aud', 'N/A'))
+          ")
+          echo "$PAYLOAD"
+
       # 2. Autenticação na AWS via OIDC (sem chaves estáticas)
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
