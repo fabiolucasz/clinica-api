@@ -30,13 +30,17 @@ echo "Starting Cloud-Init setup for Clinica API..."
 apt-get update -y
 apt-get install -y docker.io git
 
-# 2. Iniciar e habilitar o serviço Docker
+# 2. Iniciar, habilitar o serviço Docker e adicionar o usuário ubuntu ao grupo docker
 systemctl start docker
 systemctl enable docker
+usermod -aG docker ubuntu
 
-# 3. Clonar o repositório na pasta /app
-
+# 3. Clonar o repositório do GitHub na pasta /app
+if [ -d "/app" ]; then
+  rm -rf /app
+fi
 git clone https://github.com/fabiolucasz/clinica-api.git /app
+chown -R ubuntu:ubuntu /app
 
 # 4. Entrar na pasta do projeto e criar o arquivo .env
 cd /app
