@@ -59,7 +59,9 @@ class Settings(BaseSettings):
     @computed_field
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str | PostgresDsn:
-        if self.DATABASE_URL and (self.DATABASE_URL != "sqlite:///./clinica.db" or self.ENVIRONMENT == "dev"):
+        if self.DATABASE_URL and (
+            self.DATABASE_URL != "sqlite:///./clinica.db" or self.ENVIRONMENT == "dev"
+        ):
             return self.DATABASE_URL
         return f"{self.SCHEME}://{self.USER}:{self.PASSWORD}@{self.HOST}:{self.PORT}/{self.DATABASE_NAME}"
 
