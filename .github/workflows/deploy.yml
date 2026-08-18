@@ -43,16 +43,43 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-
-      # 5. Validação dos arquivos Terraform
+      # 6. Validação dos arquivos Terraform
       - name: Terraform Validate
         run: terraform validate
 
-      # 6. Planejamento das alterações
+      # 7. Planejamento das alterações passando os Secrets como variáveis do Terraform
       - name: Terraform Plan
+        env:
+          TF_VAR_database_url: ${{ secrets.DATABASE_URL }}
+          TF_VAR_secret_key: ${{ secrets.SECRET_KEY }}
+          TF_VAR_algorithm: ${{ secrets.ALGORITHM }}
+          TF_VAR_access_token_expire_minutes: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}
+          TF_VAR_domain: ${{ secrets.DOMAIN }}
+          TF_VAR_environment: production
+          TF_VAR_ai_api_key: ${{ secrets.AI_API_KEY }}
+          TF_VAR_supabase_storage_url: ${{ secrets.SUPABASE_STORAGE_URL }}
+          TF_VAR_supabase_s3_endpoint: ${{ secrets.SUPABASE_S3_ENDPOINT }}
+          TF_VAR_supabase_access_key: ${{ secrets.SUPABASE_ACCESS_KEY }}
+          TF_VAR_supabase_secret_key: ${{ secrets.SUPABASE_SECRET_KEY }}
+          TF_VAR_supabase_region: ${{ secrets.SUPABASE_REGION }}
+          TF_VAR_supabase_bucket: ${{ secrets.SUPABASE_BUCKET }}
         run: terraform plan
 
-      # 7. Aplicação da infraestrutura (VPC, Security Group, EC2)
+      # 8. Aplicação da infraestrutura (VPC, Security Group, EC2 e .env)
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
+        env:
+          TF_VAR_database_url: ${{ secrets.DATABASE_URL }}
+          TF_VAR_secret_key: ${{ secrets.SECRET_KEY }}
+          TF_VAR_algorithm: ${{ secrets.ALGORITHM }}
+          TF_VAR_access_token_expire_minutes: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}
+          TF_VAR_domain: ${{ secrets.DOMAIN }}
+          TF_VAR_environment: production
+          TF_VAR_ai_api_key: ${{ secrets.AI_API_KEY }}
+          TF_VAR_supabase_storage_url: ${{ secrets.SUPABASE_STORAGE_URL }}
+          TF_VAR_supabase_s3_endpoint: ${{ secrets.SUPABASE_S3_ENDPOINT }}
+          TF_VAR_supabase_access_key: ${{ secrets.SUPABASE_ACCESS_KEY }}
+          TF_VAR_supabase_secret_key: ${{ secrets.SUPABASE_SECRET_KEY }}
+          TF_VAR_supabase_region: ${{ secrets.SUPABASE_REGION }}
+          TF_VAR_supabase_bucket: ${{ secrets.SUPABASE_BUCKET }}
         run: terraform apply -auto-approve
