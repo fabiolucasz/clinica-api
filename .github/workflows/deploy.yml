@@ -20,11 +20,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Autenticação na AWS via OIDC
-      - name: Configure AWS credentials (OIDC)
+      # 2. Autenticação na AWS (OIDC no GitHub Actions ou Access Keys no act local)
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: us-east-1
 
       # 3. Setup do Terraform
@@ -33,13 +36,7 @@ jobs:
         with:
           terraform_version: 1.9.0
 
-      # 4. Garante que o bucket do Terraform State existe na AWS
-      - name: Ensure Terraform State S3 Bucket exists
-        run: |
-          aws s3api head-bucket --bucket clinica-api-fabiolucasz-bucket-state --region us-east-1 2>/dev/null || \
-          aws s3api create-bucket --bucket clinica-api-fabiolucasz-bucket-state --region us-east-1
-
-      # 5. Inicializa o Terraform
+      # 4. Inicializa o Terraform
       - name: Terraform Init
         run: terraform init
 
