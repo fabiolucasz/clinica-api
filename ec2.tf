@@ -45,12 +45,18 @@ chown -R ubuntu:ubuntu /app
 # 4. Entrar na pasta do projeto e criar o arquivo .env
 cd /app
 cat <<ENVEOF > .env
+DATABASE_URL=${var.database_url}
+SCHEME=${var.scheme}
+USER=${var.db_user}
+PASSWORD=${var.db_password}
+HOST=${var.db_host}
+PORT=${var.db_port}
+DATABASE_NAME=${var.database_name}
 SECRET_KEY=${var.secret_key}
 ALGORITHM=${var.algorithm}
 ACCESS_TOKEN_EXPIRE_MINUTES=${var.access_token_expire_minutes}
 DOMAIN=${var.domain}
 ENVIRONMENT=${var.environment}
-DATABASE_URL=${var.database_url}
 SUPABASE_STORAGE_URL=${var.supabase_storage_url}
 SUPABASE_S3_ENDPOINT=${var.supabase_s3_endpoint}
 SUPABASE_ACCESS_KEY=${var.supabase_access_key}

@@ -5,10 +5,48 @@ variable "aws_region" {
 }
 
 variable "database_url" {
-  description = "Database connection URL (PostgreSQL / Supabase)"
+  description = "Database connection URL (PostgreSQL / Supabase). Se fornecido, sobrescreve os campos individuais."
   type        = string
-  default     = "sqlite:///./clinica.db"
+  default     = ""
   sensitive   = true
+}
+
+variable "scheme" {
+  description = "Database driver scheme (e.g. postgresql+psycopg2)"
+  type        = string
+  default     = "postgresql+psycopg2"
+}
+
+variable "db_user" {
+  description = "Database username"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "db_password" {
+  description = "Database password"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "db_host" {
+  description = "Database host"
+  type        = string
+  default     = ""
+}
+
+variable "db_port" {
+  description = "Database port"
+  type        = string
+  default     = "6543"
+}
+
+variable "database_name" {
+  description = "Database name"
+  type        = string
+  default     = "postgres"
 }
 
 variable "secret_key" {
