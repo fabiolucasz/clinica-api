@@ -27,21 +27,18 @@ exec > >(tee /var/log/user-data.log | logger -t user-data -s 2>/dev/console) 2>&
 echo "Starting Cloud-Init setup for Clinica API..."
 
 # 1. Atualizar pacotes do sistema e instalar dependências (Docker e Git)
-apt-get update -y
-apt-get install -y docker.io git
+sudo apt-get update -y
+sudo apt-get install -y docker.io git
 
 # 2. Iniciar e habilitar o serviço Docker
-systemctl start docker
-systemctl enable docker
+sudo systemctl start docker
+sudo systemctl enable docker
 
-# 3. Clonar o repositório do GitHub na pasta /app
-if [ -d "/app" ]; then
-  rm -rf /app
-fi
-git clone https://github.com/fabiolucasz/clinica-api.git /app
+# 3. Clonar o repositório do GitHub na pasta raiz
+git clone https://github.com/fabiolucasz/clinica-api.git
 
 # 4. Criar o arquivo .env com as variáveis de ambiente passadas pelo Terraform / GitHub Actions
-cat <<ENVEOF > /app/.env
+cat <<ENVEOF > clinica-api/.env
 SECRET_KEY=${var.secret_key}
 ALGORITHM=${var.algorithm}
 ACCESS_TOKEN_EXPIRE_MINUTES=${var.access_token_expire_minutes}
@@ -58,10 +55,10 @@ AI_API_KEY=${var.ai_api_key}
 ENVEOF
 
 # 5. Entrar na pasta do projeto, construir a imagem Docker e rodar o container na porta 8001
-cd /app
-docker build -t clinica-api .
-docker rm -f clinica-api-container || true
-docker run -d --name clinica-api-container --restart always --env-file /app/.env -p 8001:8001 clinica-api
+cd clinica-api
+sudo docker build -t clinica-api .
+sudo docker rm -f clinica-api-container || true
+sudo docker run -d --name clinica-api-container --restart always --env-file ./clinica-api/.env -p 8001:8001 clinica-api
 
 echo "Clinica API deployment completed successfully!"
 EOF
