@@ -10,6 +10,8 @@ class AgendamentosBase(BaseModel):
     medico: int
     data_consulta: datetime
     turno: int
+    hora_inicio: str
+    hora_fim: str
     status: str = "agendado"
 
 

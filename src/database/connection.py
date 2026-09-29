@@ -9,3 +9,12 @@ SQLALCHEMY_DATABASE_URL = settings.SQLALCHEMY_DATABASE_URI
 engine = create_engine(str(SQLALCHEMY_DATABASE_URL))
 SessionLocal = sessionmaker(autoflush=False, autocommit=False, bind=engine)
 Base = declarative_base()
+
+
+def get_db():
+    """Dependency para obter sessão do banco de dados"""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
