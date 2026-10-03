@@ -7,11 +7,7 @@ from src.crud.user import get_user
 from src.deps.user import CurrentUser, SessionDep
 from src.logging_config.auth_user import log_user_operation
 from src.metrics.auth_user import MetricsManager
-from src.schemas.user import (
-    MedicoCreate,
-    MedicoResponse,
-    MedicoUpdate,
-)
+from src.schemas.user import MedicoCreate, MedicoResponse, MedicoUpdate
 
 router = APIRouter()
 

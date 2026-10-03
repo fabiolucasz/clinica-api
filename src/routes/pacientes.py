@@ -1,3 +1,4 @@
+import logging
 import time
 
 from fastapi import APIRouter, HTTPException, Request
@@ -6,18 +7,16 @@ from src.crud import pacientes as crud
 from src.deps.user import CurrentUser, SessionDep
 from src.logging_config.auth_user import log_user_operation
 from src.metrics.auth_user import MetricsManager
-from src.schemas.user import (
-    PacienteCreate,
-    PacienteResponse,
-    PacienteUpdate,
-)
+from src.schemas.user import UserCreate, UserResponse, UserUpdate
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
 # Pacientes
 
 
-@router.get("/pacientes", response_model=list[PacienteResponse])
+@router.get("/pacientes", response_model=list[UserResponse])
 async def get_pacientes(request: Request, current_user: CurrentUser, db: SessionDep):
     start_time = time.time()
 
@@ -45,7 +44,7 @@ async def get_pacientes(request: Request, current_user: CurrentUser, db: Session
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@router.get("/pacientes/{id}", response_model=PacienteResponse)
+@router.get("/pacientes/{id}", response_model=UserResponse)
 async def get_paciente_by_id(id: int, current_user: CurrentUser, db: SessionDep):
     # Verificar se o usuário é admin
     if current_user.role != "administrador":
@@ -65,9 +64,9 @@ async def get_paciente_by_id(id: int, current_user: CurrentUser, db: SessionDep)
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@router.post("/pacientes", response_model=PacienteResponse)
+@router.post("/pacientes", response_model=UserResponse)
 async def create_paciente(
-    paciente: PacienteCreate, current_user: CurrentUser, db: SessionDep
+    paciente: UserCreate, current_user: CurrentUser, db: SessionDep
 ):
     # Verificar se o usuário é admin
     if current_user.role != "administrador":
@@ -80,12 +79,13 @@ async def create_paciente(
         created_paciente = crud.create_paciente(db, paciente)
         return created_paciente
     except Exception:
+        logger.exception("Erro ao criar paciente: ")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@router.put("/pacientes/{id}", response_model=PacienteUpdate)
+@router.put("/pacientes/{id}", response_model=UserResponse)
 async def update_paciente(
-    id: int, paciente: PacienteUpdate, current_user: CurrentUser, db: SessionDep
+    id: int, paciente: UserUpdate, current_user: CurrentUser, db: SessionDep
 ):
     # Verificar se o usuário é admin
     if current_user.role != "administrador":

@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from src.database.connection import Base, engine, SessionLocal
+from src.database.connection import Base, SessionLocal, engine
 from src.models import models
 from src.models.models import Calendario, CalendarioClinica
 
