@@ -80,38 +80,7 @@ api/
    ```
 
 3. **Configure as variáveis de ambiente:**
-   Crie um arquivo `.env` na raiz do projeto com base no `.env-example`:
-
-   ```env
-   ENVIRONMENT=dev
-   DOMAIN=localhost
-   SECRET_KEY=sua-secret-key-super-segura
-   ALGORITHM=HS256
-   ACCESS_TOKEN_EXPIRE_MINUTES=60
-   DATABASE_URL=sqlite:///./clinica.db
-
-   # PostgreSQL (Para produção ou testes com Postgres)
-   SCHEME=postgresql+psycopg2
-   USER=postgres
-   PASSWORD=postgres
-   HOST=localhost
-   PORT=5432
-   DATABASE_NAME=clinica_db
-
-   # Supabase Storage / S3
-   SUPABASE_STORAGE_URL=https://sua-url-supabase.co
-   SUPABASE_S3_ENDPOINT=https://sua-url-supabase.co/storage/v1/s3
-   SUPABASE_ACCESS_KEY=sua-access-key
-   SUPABASE_SECRET_KEY=sua-secret-key
-   SUPABASE_REGION=sa-east-1
-   SUPABASE_BUCKET=clinica-files
-
-   # Configurações da API de IA (OpenAI / compatíveis)
-   AI_API_KEY=sua-api-key-openai
-   AI_BASE_URL=https://api.openai.com/v1
-   AI_MODEL=gpt-4o-mini
-   ```
-
+   Crie um arquivo `.env` na raiz do projeto com base no `.env-example`.
 ---
 
 ## Execução
@@ -121,10 +90,10 @@ api/
 Para iniciar o servidor de desenvolvimento com reload automático:
 
 ```bash
-uv run uvicorn src.main:app --reload
+uv run uvicorn src.main:app --port 8001 --reload
 ```
 
-A API estará disponível em `http://localhost:8000`.
+A API estará disponível em `http://localhost:8001`.
 
 ### 2. Modo Containerizado (Docker)
 
@@ -272,6 +241,36 @@ A **Clinica API** possui um módulo de IA generativa integrado para otimizar o a
 | :--- | :--- | :--- | :---: |
 | `GET` | `/metrics` | Métricas operacionais expostas para coleta do Prometheus | Não |
 
+### Google OAuth - Login Social
+
+| Método | Endpoint | Descrição | Requer Auth |
+| :--- | :--- | :--- | :---: |
+| `GET` | `/auth/google/login` | Inicia fluxo de login social com Google OAuth | Não |
+| `GET` | `/auth/google/callback` | Callback do Google OAuth após autorização (login social) | Não |
+| `GET` | `/google/auth/url` | Gera URL de autorização para vincular conta Google | Sim |
+| `GET` | `/google/auth/callback` | Callback do Google OAuth após autorização (vinculação) | Não |
+| `GET` | `/google/credentials` | Verifica se usuário tem credenciais Google conectadas | Sim |
+| `DELETE` | `/google/disconnect` | Desconecta conta Google do usuário | Sim |
+
+**Funcionalidades do Google OAuth:**
+
+- **Login Social:** Usuários podem fazer login usando conta Google se o email existir no banco de dados
+- **Vinculação:** Usuários autenticados podem vincular conta Google para futuras integrações
+- **Segurança:** Implementa PKCE (Proof Key for Code Exchange) para maior segurança no fluxo OAuth
+- **Escopos:** `userinfo.email` e `userinfo.profile` para obter email e informações básicas do usuário
+
+**Fluxo de Login Social:**
+1. Frontend solicita URL de login via `/auth/google/login`
+2. Usuário é redirecionado para Google e autoriza o acesso
+3. Google redireciona para `/auth/google/callback` com código de autorização
+4. Backend troca código por credenciais, obtém email do usuário
+5. Se email existir no banco, gera token JWT e retorna para frontend
+
+**Fluxo de Vinculação:**
+1. Usuário autenticado solicita URL via `/google/auth/url`
+2. Usuário autoriza acesso no Google
+3. Backend salva credenciais OAuth no banco para uso futuro
+
 ---
 
 ## Autenticação e Controle de Acesso (RBAC)
@@ -311,7 +310,7 @@ uv run pytest src/tests/ -s
 ### Executar Teste Específico
 
 ```bash
-uv run pytest src/tests/test_auth.py -s
+uv run pytest src/tests/test_google_oauth.py -s
 ```
 
 ---

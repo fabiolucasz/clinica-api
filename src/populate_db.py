@@ -1,11 +1,23 @@
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from src.database.connection import SessionLocal
+from src.database.connection import Base, SessionLocal, engine
 from src.models import models
 from src.models.models import Calendario, CalendarioClinica
 
 agora_sp = datetime.now(ZoneInfo("America/Sao_Paulo"))
+
+
+def create_tables():
+    """Cria todas as tabelas no banco de dados"""
+    print("🔨 Criando tabelas no banco de dados...")
+    try:
+        Base.metadata.create_all(bind=engine)
+        print("✅ Tabelas criadas com sucesso!")
+        return True
+    except Exception as e:
+        print(f"❌ Erro ao criar tabelas: {e}")
+        return False
 
 
 def create_estados():
@@ -370,12 +382,17 @@ def populate_database():
     """Função principal para popular o banco de dados"""
     print("🚀 Iniciando população do banco de dados...")
 
+    # Criar tabelas primeiro
+    if not create_tables():
+        print("❌ Falha ao criar tabelas. Abortando.")
+        return
+
     # Criar dados básicos
     create_estados()
     create_tipos_conselho()
     create_especialidades()
     turnos()
-    create_horario_consulta()  # Adicionado!
+    create_horario_consulta()
     popular_calendario()
     popular_calendario_clinica()
 

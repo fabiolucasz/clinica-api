@@ -20,11 +20,7 @@ def get_medicos(db: Session, skip: int = 0, limit: int = 100):
 def get_medicos_completo(db: Session, skip: int = 0, limit: int = 100):
     medicos = (
         db.query(models.User)
-        .options(
-            joinedload(models.User.especialidade_rel),
-            joinedload(models.User.tipo_conselho_rel),
-            joinedload(models.User.estado_rel),
-        )
+        .options(joinedload(models.User.estado_rel))
         .filter(models.User.role == "medico")
         .offset(skip)
         .limit(limit)
@@ -51,24 +47,6 @@ def get_medicos_completo(db: Session, skip: int = 0, limit: int = 100):
             "estado_nome": medico.estado_rel.uf if medico.estado_rel else None,
             "role": medico.role,
             "foto_perfil": medico.foto_perfil,
-            "especialidade": medico.especialidade,
-            "especialidade_nome": (
-                medico.especialidade_rel.nome if medico.especialidade_rel else None
-            ),
-            "rqe": medico.rqe,
-            "valor_consulta": medico.valor_consulta,
-            "tipo_conselho": medico.tipo_conselho,
-            "tipo_conselho_nome": (
-                medico.tipo_conselho_rel.nome if medico.tipo_conselho_rel else None
-            ),
-            "uf_conselho": medico.uf_conselho,
-            "uf_conselho_nome": (
-                medico.estado_rel.uf
-                if medico.estado_rel and medico.uf_conselho
-                else None
-            ),
-            "numero_conselho": medico.numero_conselho,
-            "upload_arquivo": medico.upload_arquivo,
             "created_at": medico.created_at,
             "updated_at": medico.updated_at,
         }
@@ -88,24 +66,28 @@ def get_medico_by_id(db: Session, id: int):
 
 def create_medico(db: Session, medico: MedicoCreate):
     db_medico = models.User(
-        hashed_password=get_password_hash(medico.password),
-        nome=medico.nome,
         email=medico.email,
+        hashed_password=get_password_hash(medico.password),
+        is_active=True,
+        # Identificação
+        nome=medico.nome,
         celular=medico.celular,
         cpf=medico.cpf,
         data_nascimento=medico.data_nascimento,
         sexo=medico.sexo,
+        cep=medico.cep,
         rua=medico.rua,
         numero=medico.numero,
         bairro=medico.bairro,
         cidade=medico.cidade,
         estado=medico.estado,
-        cep=medico.cep,
         role="medico",
+        # Perfil
         foto_perfil=medico.foto_perfil,
         especialidade=medico.especialidade,
         rqe=medico.rqe,
         valor_consulta=medico.valor_consulta,
+        # Documentos
         tipo_conselho=medico.tipo_conselho,
         uf_conselho=medico.uf_conselho,
         numero_conselho=medico.numero_conselho,

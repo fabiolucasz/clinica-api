@@ -31,6 +31,7 @@ def create_user(db: Session, user: UserCreate):
     db_user = models.User(
         email=user.email,
         hashed_password=get_password_hash(user.password),
+        is_active=True,
         # Identificação
         nome=user.nome,
         celular=user.celular,
@@ -46,14 +47,6 @@ def create_user(db: Session, user: UserCreate):
         role=user.role,
         # Perfil
         foto_perfil=user.foto_perfil,
-        especialidade=user.especialidade,
-        rqe=user.rqe,
-        valor_consulta=user.valor_consulta,
-        # Documentos
-        tipo_conselho=user.tipo_conselho,
-        uf_conselho=user.uf_conselho,
-        numero_conselho=user.numero_conselho,
-        upload_arquivo=user.upload_arquivo,
     )
     db.add(db_user)
     db.commit()
@@ -65,7 +58,7 @@ def update_user(db: Session, user_id: int, user: UserUpdate):
     db_user = get_user(db, user_id=user_id)
     if not db_user:
         return None
-    for key, value in user.dict().items():
+    for key, value in user.model_dump().items():
         if value is not None:
             setattr(db_user, key, value)
     db.commit()

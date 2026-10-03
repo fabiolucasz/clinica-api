@@ -33,7 +33,8 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
 
     # PostgreSQL for production (optional for dev)
-
+    # Se estiver usando Supabase, coloque a DATABASE_URL completa aqui
+    # Exemplo: postgresql+psycopg2://postgres.zdjbqwaosayfqjihmzty:senha@aws-1-sa-east-1.pooler.supabase.com:6543/postgres
     SCHEME: str = "postgresql+psycopg2"
     HOST: str = "localhost"
     USER: str = "postgres"
@@ -45,6 +46,14 @@ class Settings(BaseSettings):
     AI_API_KEY: str = "mock-key"
     AI_BASE_URL: str = "https://api.openai.com/v1"
     AI_MODEL: str = "gpt-4o-mini"
+
+    # Google OAuth Configuration
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+    GOOGLE_REDIRECT_URI: str = "http://localhost:8001/google/auth/callback"
+
+    # CORS Configuration
+    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:8000"
 
     @computed_field
     @property
@@ -59,9 +68,11 @@ class Settings(BaseSettings):
     @computed_field
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str | PostgresDsn:
-        if self.DATABASE_URL and (
-            self.DATABASE_URL != "sqlite:///./clinica.db" or self.ENVIRONMENT == "dev"
-        ):
+        if self.ENVIRONMENT == "dev":
+            return self.DATABASE_URL
+        # Em prod, usa DATABASE_URL se estiver definida (melhor para Supabase)
+        # Caso contrário, constrói a URI com os componentes
+        if self.DATABASE_URL and not self.DATABASE_URL.startswith("sqlite"):
             return self.DATABASE_URL
         return f"{self.SCHEME}://{self.USER}:{self.PASSWORD}@{self.HOST}:{self.PORT}/{self.DATABASE_NAME}"
 

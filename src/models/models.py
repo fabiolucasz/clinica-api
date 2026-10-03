@@ -1,5 +1,3 @@
-from datetime import UTC, datetime
-
 from sqlalchemy import (
     Boolean,
     Column,
@@ -9,6 +7,7 @@ from sqlalchemy import (
     Integer,
     String,
     UniqueConstraint,
+    func,
 )
 from sqlalchemy.orm import relationship
 
@@ -123,8 +122,8 @@ class User(Base):
     upload_arquivo = Column(String(200), nullable=True)
 
     # Metadados
-    created_at = Column(DateTime, default=datetime.now(UTC))
-    updated_at = Column(DateTime, default=datetime.now(UTC), onupdate=datetime.now(UTC))
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
     vagas_segunda = relationship(
         "Vagas", foreign_keys="Vagas.segunda", back_populates="medico_segunda"
@@ -151,6 +150,9 @@ class User(Base):
         "Agendamentos", foreign_keys="Agendamentos.medico", back_populates="medico_rel"
     )
     estado_rel = relationship("Estados", foreign_keys=[estado])
+    google_credentials = relationship(
+        "GoogleCredentials", back_populates="user", uselist=False
+    )
     uf_conselho_rel = relationship("Estados", foreign_keys=[uf_conselho])
     especialidade_rel = relationship("Especialidades", foreign_keys=[especialidade])
     tipo_conselho_rel = relationship("Tipo_conselho", foreign_keys=[tipo_conselho])
@@ -178,8 +180,8 @@ class Clinicas(Base):
     cidade = Column(String(100))
     estado = Column(Integer, ForeignKey("estados.id"))
 
-    created_at = Column(DateTime, default=datetime.now(UTC))
-    updated_at = Column(DateTime, default=datetime.now(UTC), onupdate=datetime.now(UTC))
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
     estado_rel = relationship("Estados")
     salas = relationship("Salas", back_populates="clinica_rel")
@@ -276,7 +278,7 @@ class Agendamentos(Base):
     paciente = Column(Integer, ForeignKey("users.id"))
     medico = Column(Integer, ForeignKey("users.id"))
 
-    data_consulta = Column(DateTime, default=datetime.now(UTC))
+    data_consulta = Column(DateTime, server_default=func.now())
     turno = Column(Integer, ForeignKey("turnos.id"))
     hora_inicio = Column(String(5), nullable=False)
     hora_fim = Column(String(5), nullable=False)
@@ -323,5 +325,28 @@ class Lead(Base):
     status = Column(
         String(50), default="aguardando"
     )  # aguardando, contato_iniciado, agendado, concluido
-    created_at = Column(DateTime, default=datetime.now(UTC))
-    updated_at = Column(DateTime, default=datetime.now(UTC), onupdate=datetime.now(UTC))
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+
+# Model GoogleCredentials para armazenar credenciais OAuth do Google
+class GoogleCredentials(Base):
+    __tablename__ = "google_credentials"
+
+    id = Column(
+        Integer, primary_key=True, index=True, nullable=False, autoincrement=True
+    )
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, unique=True)
+    google_token = Column(String(500), nullable=False)
+    google_refresh_token = Column(String(500), nullable=False)
+    google_token_uri = Column(String(200), nullable=False)
+    google_client_id = Column(String(200), nullable=False)
+    google_client_secret = Column(String(200), nullable=False)
+    google_scopes = Column(String(1000), nullable=False)  # JSON array como string
+    google_expiry = Column(DateTime, nullable=True)
+    is_connected = Column(Boolean, default=True)
+    connected_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    # Relacionamento
+    user = relationship("User", back_populates="google_credentials")

@@ -2,44 +2,67 @@ from datetime import datetime
 
 from pydantic import BaseModel, EmailStr
 
-
 # User schemas
+
+
 class UserBase(BaseModel):
+
     email: EmailStr
 
 
 class UserCreate(UserBase):
     password: str
+
     # Identificação
     nome: str
     celular: str
     cpf: str
     data_nascimento: str
     sexo: str
-    cep: str
-    rua: str
-    numero: str
-    bairro: str
-    cidade: str
-    estado: int = 1
+    cep: str | None = None
+
+    # Endereço
+    rua: str | None = None
+    numero: str | None = None
+    bairro: str | None = None
+    cidade: str | None = None
+    estado: int = 19
+
+    foto_perfil: str
     role: str = "paciente"
-
-    # Perfil (opcional)
-    foto_perfil: str | None = None
-    especialidade: int = 1
-    rqe: str | None = None
-    valor_consulta: float = 150
-
-    # Documentos (opcional)
-    tipo_conselho: int = 1
-    uf_conselho: int = 1
-    numero_conselho: str | None = None
-    upload_arquivo: str | None = None
 
 
 class UserUpdate(BaseModel):
+
+    nome: str | None = None
+
+    celular: str | None = None
+
+    data_nascimento: str | None = None
+
+    sexo: str | None = None
+
+    cep: str | None = None
+
+    rua: str | None = None
+
+    numero: str | None = None
+
+    bairro: str | None = None
+
+    cidade: str | None = None
+
+    estado: int | None = None
+
+    foto_perfil: str | None = None
+
+
+class UserResponse(UserBase):
+    id: int
+    is_active: bool
     nome: str | None = None
     celular: str | None = None
+    cpf: str | None = None
     data_nascimento: str | None = None
     sexo: str | None = None
     cep: str | None = None
@@ -48,114 +71,68 @@ class UserUpdate(BaseModel):
     bairro: str | None = None
     cidade: str | None = None
     estado: int | None = None
+    role: str | None = None
     foto_perfil: str | None = None
-    especialidade: int | None = None
-    rqe: str | None = None
-    valor_consulta: float | None = None
-    tipo_conselho: int | None = None
-    uf_conselho: int | None = None
-    numero_conselho: str | None = None
-
-
-class User(UserBase):
-    id: int
-    is_active: bool
-    foto_perfil: str | None = None
-    especialidade: int | None = None
-    rqe: str | None = None
-    valor_consulta: float | None = None
-    tipo_conselho: int | None = None
-    uf_conselho: int | None = None
-    numero_conselho: str | None = None
-    upload_arquivo: str | None = None
-    created_at: datetime
-    updated_at: datetime
-
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
     model_config = {"from_attributes": True}
 
 
-class PacienteBase(BaseModel):
-    nome: str
-    email: EmailStr
-    celular: str
-    cpf: str
-    data_nascimento: str
-    sexo: str
-    cep: str
-    rua: str
-    numero: str
-    bairro: str
-    cidade: str
-    estado: int
-    role: str
-    foto_perfil: str | None = None
-
-
-class PacienteCreate(PacienteBase):
+class MedicoCreate(UserBase):
     password: str
-
-
-class PacienteUpdate(PacienteBase):
-    pass
-
-
-class PacienteResponse(PacienteBase):
-    id: int
-
-    model_config = {"from_attributes": True}
-
-
-class MedicoBase(BaseModel):
+    # Identificação
     nome: str
-    email: EmailStr
     celular: str
     cpf: str
     data_nascimento: str
     sexo: str
-    cep: str
-    rua: str
-    numero: str
-    bairro: str
-    cidade: str
-    estado: int = 1
+    cep: str | None = None
+    # Endereço
+    rua: str | None = None
+    numero: str | None = None
+    bairro: str | None = None
+    cidade: str | None = None
+    estado: int = 19
+    # Perfil
+    especialidade: int = 1
+    rqe: str
+    valor_consulta: float
+    role: str = "medico"
+    foto_perfil: str | None = None
+    # Documentos
+    tipo_conselho: int = 1
+    uf_conselho: int = 19
+    numero_conselho: str
+    upload_arquivo: str | None = None
+
+
+class MedicoUpdate(UserUpdate):
+    especialidade: int | None = None
+    rqe: str | None = None
+    valor_consulta: float | None = None
     role: str = "medico"
 
-    # Perfil profissional (opcional)
-    foto_perfil: str | None = None
-    especialidade: int | None = None
-    rqe: str | None = None
-    valor_consulta: float | None = None
-
-    # Documentos (opcional)
     tipo_conselho: int | None = None
     uf_conselho: int | None = None
-    numero_conselho: str | None = None
+    numero_conselho: int | None = None
     upload_arquivo: str | None = None
 
 
-class MedicoCreate(MedicoBase):
-    password: str
-
-
-class MedicoUpdate(MedicoBase):
-    pass
-
-
-class MedicoResponse(MedicoBase):
+class MedicoResponse(UserBase):
     id: int
-    nome: str
-    email: EmailStr
-    celular: str
-    cpf: str
-    data_nascimento: str
-    sexo: str
-    cep: str
-    rua: str
-    numero: str
-    bairro: str
-    cidade: str
-    estado: int
-    role: str
+    is_active: bool
+    nome: str | None = None
+    celular: str | None = None
+    cpf: str | None = None
+    data_nascimento: str | None = None
+    sexo: str | None = None
+    cep: str | None = None
+    rua: str | None = None
+    numero: str | None = None
+    bairro: str | None = None
+    cidade: str | None = None
+    estado: int | None = None
+    role: str | None = None
     foto_perfil: str | None = None
     especialidade: int | None = None
     rqe: str | None = None
@@ -164,49 +141,18 @@ class MedicoResponse(MedicoBase):
     uf_conselho: int | None = None
     numero_conselho: str | None = None
     upload_arquivo: str | None = None
-    created_at: datetime
-    updated_at: datetime
-
-    model_config = {"from_attributes": True}
-
-
-class MedicoResponseCompleto(BaseModel):
-    id: int
-    nome: str
-    email: EmailStr
-    celular: str
-    cpf: str
-    data_nascimento: str
-    sexo: str
-    cep: str
-    rua: str
-    numero: str
-    bairro: str
-    cidade: str
-    estado: int
-    estado_nome: str | None = None
-    role: str
-    foto_perfil: str | None = None
-    especialidade: int | None = None
-    especialidade_nome: str | None = None
-    rqe: str | None = None
-    valor_consulta: float | None = None
-    tipo_conselho: int | None = None
-    tipo_conselho_nome: str | None = None
-    uf_conselho: int | None = None
-    uf_conselho_nome: str | None = None
-    numero_conselho: str | None = None
-    upload_arquivo: str | None = None
-    created_at: datetime
-    updated_at: datetime
-
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
     model_config = {"from_attributes": True}
 
 
 class Token(BaseModel):
+
     access_token: str
+
     token_type: str = "bearer"
 
 
 class TokenPayload(BaseModel):
+
     sub: int | None = None

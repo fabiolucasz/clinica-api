@@ -1,7 +1,9 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-from src.database.connection import Base, engine
+from src.database.config import settings
 from src.metrics.auth_user import metrics_endpoint
+from src.populate_db import populate_database
 from src.routes.agenda import router as agenda_router
 from src.routes.agendamento import router as agendamento_router
 from src.routes.agendamentos import router as agendamentos_router
@@ -11,6 +13,7 @@ from src.routes.clinicas import router as clinicas_router
 from src.routes.dashboard import router as dashboard_router
 from src.routes.especialidades import router as especialidades_router
 from src.routes.estados import router as estados_router
+from src.routes.google_oauth import router as google_oauth_router
 from src.routes.medico_sala_optimized import router as medico_sala_optimized_router
 from src.routes.medico_sala_simple import router as medico_sala_simple_router
 from src.routes.medicos import router as medicos_router
@@ -23,11 +26,19 @@ from src.routes.vagas import router as vagas_router
 
 app = FastAPI()
 
-# Criar tabelas
-Base.metadata.create_all(bind=engine)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.CORS_ORIGINS.split(","),
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-# Popular banco com dados iniciais
-# populate_database()
+
+@app.on_event("startup")
+async def startup_event():
+    """Evento de startup da aplicação"""
+    populate_database()
 
 
 @app.get("/")
@@ -64,6 +75,7 @@ app.include_router(tipo_conselho_router, tags=["Tipo Conselho"])
 app.include_router(clinicas_router, tags=["Clinicas"])
 app.include_router(salas_router, tags=["Salas"])
 app.include_router(vagas_router, tags=["Vagas"])
+app.include_router(google_oauth_router, tags=["Google OAuth"])
 app.include_router(agendamentos_router, tags=["Agendamentos"])
 app.include_router(calendario_clinica_router, tags=["Calendario Clinica"])
 app.include_router(medico_sala_optimized_router, tags=["Medico Sala Optimized"])
